@@ -31,6 +31,7 @@ const PromotionRequest = (props) => {
   const [request, setRequest] = useState(false)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [myWallet, setMyWallet] = useState('Connect Wallet')
 
   const router = useRouter()
 
@@ -50,9 +51,11 @@ const PromotionRequest = (props) => {
   }, [router.query])
 
   var today = new Date()
-  let charge = parseFloat((40 * Number(duration))/100).toFixed(2)
-  let isExpired = new Date(today.getTime() + duration * 24 * 60 * 60 * 1000).toLocaleDateString()
-         
+  let charge = parseFloat((40 * Number(duration)) / 100).toFixed(2)
+  let isExpired = new Date(
+    today.getTime() + duration * 24 * 60 * 60 * 1000,
+  ).toLocaleDateString()
+
   useEffect(() => {
     const getTotal = () => {
       const res = charge
@@ -60,8 +63,6 @@ const PromotionRequest = (props) => {
     }
     getTotal()
   }, [charge])
-
-
 
   const handlePromotionRequest = async (e) => {
     e.preventDefault()
@@ -93,7 +94,6 @@ const PromotionRequest = (props) => {
       toast.error('Duration code is required.')
       return
     }
-   
 
     // return dispatch({ type: 'NOTIFY', payload: {error: 'Please add your address and mobile.'}})
 
@@ -240,277 +240,323 @@ const PromotionRequest = (props) => {
       </div>
     )
 
+    useEffect(() => {
+      if (window.ethereum) {
+        loadNFTs()
+        return
+      }
+      setWallet('undefined')
+      toast('Wallet not installed')
+    }, [])
+
   return (
     <>
-      <head>
-        <title>
+      {myWallet === 'undefined' ? (
+        <>
+          <head>
+            <title>
+              {sites.map((site) => (
+                <SiteName key={site._id} site={site} />
+              ))}{' '}
+              | Assets
+            </title>
+          </head>
           {sites.map((site) => (
-            <SiteName key={site._id} site={site} />
-          ))}{' '}
-          | Promotion-Request
-        </title>
-      </head>
-      {sites.map((site) => (
-        <NavBar key={site._id} site={site} />
-      ))}
-      <div className="breadcrumbs">
-        <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <div className="bread-inner">
-                <ul className="bread-list">
-                  <li>
-                    <Link href="/">
-                      <a>
-                        Home<i className="ti-arrow-right"></i>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="active">
-                    <Link href="/promotion-request">Promotion Request</Link>
-                  </li>
-                </ul>
+            <NavBar key={site._id} site={site} />
+          ))}
+          <center style={{ height: '50vh', marginTop: '300px' }}>
+            <h4 className="text-danger">
+              NFT not Found (Please install and connect your wallet)
+            </h4>
+          </center>
+          <>
+            {sites.map((site) => (
+              <Footer key={site._id} site={site} />
+            ))}
+          </>
+        </>
+      ) : (
+        <>
+          <head>
+            <title>
+              {sites.map((site) => (
+                <SiteName key={site._id} site={site} />
+              ))}{' '}
+              | Promotion-Request
+            </title>
+          </head>
+          {sites.map((site) => (
+            <NavBar key={site._id} site={site} />
+          ))}
+          <div className="breadcrumbs">
+            <div className="container">
+              <div className="row">
+                <div className="col-12">
+                  <div className="bread-inner">
+                    <ul className="bread-list">
+                      <li>
+                        <Link href="/">
+                          <a>
+                            Home<i className="ti-arrow-right"></i>
+                          </a>
+                        </Link>
+                      </li>
+                      <li className="active">
+                        <Link href="/promotion-request">Promotion Request</Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <section className="shop login section">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-6 offset-lg-3 col-12">
-              <div className="login-form">
-                <center>
-                  <h3>Request for Buiness Promotion</h3>
-                </center>
-                {/* Form */}
-                <form className="form">
-                  <div className="row">
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>
-                          Your Company's Name<span>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="companyName"
-                          value={companyName}
-                          onChange={(e) => setCompanyName(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>
-                          Your Company's Website URL<span>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="companyWebsite"
-                          value={companyWebsite}
-                          onChange={(e) => setCompanyWebsite(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>
-                          Your Company's Country<span>*</span>
-                        </label>
-                        <CountryDropdown
-                          value={country}
-                          style={{ color: 'grey' }}
-                          className="form-control"
-                          onChange={setCountry}
-                          name="country"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>
-                          Your Company's Region or State<span>*</span>
-                        </label>
-                        <RegionDropdown
-                          disableWhenEmpty={true}
-                          country={country}
-                          style={{ color: 'grey' }}
-                          className="form-control"
-                          value={region}
-                          onChange={setRegion}
-                          name="region"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>
-                          Your Company's Address<span>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="address"
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>
-                          Your Company's CAC<span>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="companyCAC"
-                          value={companyCAC}
-                          onChange={(e) => setCompanyCAC(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label>
-                          Select Duration<span>*</span>
-                        </label>
-                        <br />
-                        <select
-                          className="form-control"
-                          value={duration}
-                          onChange={(e) => setDuration(e.target.value)}
-                        >
-                          <option>Select Duration</option>
-                          <option value="1">1 Day</option>
-                          <option value="2">2 Days</option>
-                          <option value="3">3 Days</option>
-                          <option value="4">4 Days</option>
-                          <option value="5">5 Days</option>
-                          <option value="6">6 Days</option>
-                          <option value="7">7 Days</option>
-                          <option value="8">8 Days</option>
-                          <option value="9">9 Days</option>
-                          <option value="10">10 Days</option>
-                          <option value="12">12 Days</option>
-                          <option value="13">13 Days</option>
-                          <option value="14">14 Days</option>
-                          <option value="15">15 Days</option>
-                          <option value="16">16 Days</option>
-                          <option value="17">17 Days</option>
-                          <option value="18">18 Days</option>
-                          <option value="19">19 Days</option>
-                          <option value="20">20 Days</option>
-                          <option value="21">21 Days</option>
-                          <option value="22">22 Days</option>
-                          <option value="23">23 Days</option>
-                          <option value="24">24 Days</option>
-                          <option value="25">25 Days</option>
-                          <option value="26">26 Days</option>
-                          <option value="27">27 Days</option>
-                          <option value="28">28 Days</option>
-                          <option value="29">29 Days</option>
-                          <option value="30">30 Days</option>
-                          <option value="31">31 Days</option>
-                        </select>
-                        <small id="emailHelp" className="form-text text-muted">
-                          <p>
-                            <b>
-                              1 - 10days = BASIC PLAN
-                              <br />
-                              Above 10days - 20days = PREMIUM PLAN
-                              <br />
-                              Above 20day = GOLD PLAN
-                            </b>
-                            <p style={{ color: 'crimson' }}>
-                              NOTE : You will be charged a 40% fee for this
-                              promotion. Fee charged depends on promotion plan.
-                            </p>
-                          </p>
-                        </small>
-                      </div>
-                      <input
-                          type="text"
-                          style={{display: "none"}}
-                          name="dateOfExpiration"
-                          value={isExpired}
-                          onChange={(e) => setDateOfExpiration(e.target.value)}
-                        />
-                    </div>
-                    <div className="col-12">
-                      <p>
-                        <input
-                          type="checkbox"
-                          onClick={toggleRegisterVisiblity}
-                          value="None"
-                          id="slideThree"
-                          name="check"
-                        />{' '}
-                        <small>
-                          By submitting this request, you agree to our
-                          Conditions of Use & Sale. Please see our Privacy
-                          Notice, our Cookies Notice and our Interest-Based Ads
-                          Notice.{' '}
-                          <a href="/terms-conditions" target="_blank">
-                            <a style={{ color: 'crimson' }}>
-                              Terms & Conditions
-                            </a>
-                          </a>
-                        </small>
-                      </p>
-                    </div>
-                    <div className="button5">
-                      {request ? (
-                        <promotionPaymentBtn
-                          total={charge}
-                          companyName={companyName}
-                          dateOfExpiration={isExpired}
-                          companyWebsite={companyWebsite}
-                          address={address}
-                          duration={duration}
-                          country={country}
-                          region={region}
-                          state={state}
-                          dispatch={dispatch}
-                        />
-                      ) : (
-                        <div className="col-12">
-                          <div
-                            className="form-group login-btn"
-                            style={{ justifyContent: 'space-between' }}
-                          >
-                            {terms_conditions ? (
-                              <button
-                                type="submit"
-                                className="btn w-100"
-                                onClick={handlePromotionRequest}
-                              >
-                                <b>Continue For ${charge}</b>
-                              </button>
-                            ) : (
-                              <button
-                                type="submit"
-                                disabled
-                                className="btn w-100"
-                              >
-                                <b>
-                                  Kindly agree to our Conditions of Use & Sale.
-                                </b>
-                              </button>
-                            )}
+          <section className="shop login section">
+            <div className="container">
+              <div className="row">
+                <div className="col-lg-6 offset-lg-3 col-12">
+                  <div className="login-form">
+                    <center>
+                      <h3>Request for Buiness Promotion</h3>
+                    </center>
+                    {/* Form */}
+                    <form className="form">
+                      <div className="row">
+                        <div className="col-6">
+                          <div className="form-group">
+                            <label>
+                              Your Company's Name<span>*</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="companyName"
+                              value={companyName}
+                              onChange={(e) => setCompanyName(e.target.value)}
+                            />
                           </div>
                         </div>
-                      )}
-                    </div>
+                        <div className="col-6">
+                          <div className="form-group">
+                            <label>
+                              Your Company's Website URL<span>*</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="companyWebsite"
+                              value={companyWebsite}
+                              onChange={(e) =>
+                                setCompanyWebsite(e.target.value)
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <div className="form-group">
+                            <label>
+                              Your Company's Country<span>*</span>
+                            </label>
+                            <CountryDropdown
+                              value={country}
+                              style={{ color: 'grey' }}
+                              className="form-control"
+                              onChange={setCountry}
+                              name="country"
+                            />
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <div className="form-group">
+                            <label>
+                              Your Company's Region or State<span>*</span>
+                            </label>
+                            <RegionDropdown
+                              disableWhenEmpty={true}
+                              country={country}
+                              style={{ color: 'grey' }}
+                              className="form-control"
+                              value={region}
+                              onChange={setRegion}
+                              name="region"
+                            />
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <div className="form-group">
+                            <label>
+                              Your Company's Address<span>*</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="address"
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <div className="form-group">
+                            <label>
+                              Your Company's CAC<span>*</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="companyCAC"
+                              value={companyCAC}
+                              onChange={(e) => setCompanyCAC(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="form-group">
+                            <label>
+                              Select Duration<span>*</span>
+                            </label>
+                            <br />
+                            <select
+                              className="form-control"
+                              value={duration}
+                              onChange={(e) => setDuration(e.target.value)}
+                            >
+                              <option>Select Duration</option>
+                              <option value="1">1 Day</option>
+                              <option value="2">2 Days</option>
+                              <option value="3">3 Days</option>
+                              <option value="4">4 Days</option>
+                              <option value="5">5 Days</option>
+                              <option value="6">6 Days</option>
+                              <option value="7">7 Days</option>
+                              <option value="8">8 Days</option>
+                              <option value="9">9 Days</option>
+                              <option value="10">10 Days</option>
+                              <option value="12">12 Days</option>
+                              <option value="13">13 Days</option>
+                              <option value="14">14 Days</option>
+                              <option value="15">15 Days</option>
+                              <option value="16">16 Days</option>
+                              <option value="17">17 Days</option>
+                              <option value="18">18 Days</option>
+                              <option value="19">19 Days</option>
+                              <option value="20">20 Days</option>
+                              <option value="21">21 Days</option>
+                              <option value="22">22 Days</option>
+                              <option value="23">23 Days</option>
+                              <option value="24">24 Days</option>
+                              <option value="25">25 Days</option>
+                              <option value="26">26 Days</option>
+                              <option value="27">27 Days</option>
+                              <option value="28">28 Days</option>
+                              <option value="29">29 Days</option>
+                              <option value="30">30 Days</option>
+                              <option value="31">31 Days</option>
+                            </select>
+                            <small
+                              id="emailHelp"
+                              className="form-text text-muted"
+                            >
+                              <p>
+                                <b>
+                                  1 - 10days = BASIC PLAN
+                                  <br />
+                                  Above 10days - 20days = PREMIUM PLAN
+                                  <br />
+                                  Above 20day = GOLD PLAN
+                                </b>
+                                <p style={{ color: 'crimson' }}>
+                                  NOTE : You will be charged a 40% fee for this
+                                  promotion. Fee charged depends on promotion
+                                  plan.
+                                </p>
+                              </p>
+                            </small>
+                          </div>
+                          <input
+                            type="text"
+                            style={{ display: 'none' }}
+                            name="dateOfExpiration"
+                            value={isExpired}
+                            onChange={(e) =>
+                              setDateOfExpiration(e.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="col-12">
+                          <p>
+                            <input
+                              type="checkbox"
+                              onClick={toggleRegisterVisiblity}
+                              value="None"
+                              id="slideThree"
+                              name="check"
+                            />{' '}
+                            <small>
+                              By submitting this request, you agree to our
+                              Conditions of Use & Sale. Please see our Privacy
+                              Notice, our Cookies Notice and our Interest-Based
+                              Ads Notice.{' '}
+                              <a href="/terms-conditions" target="_blank">
+                                <a style={{ color: 'crimson' }}>
+                                  Terms & Conditions
+                                </a>
+                              </a>
+                            </small>
+                          </p>
+                        </div>
+                        <div className="button5">
+                          {request ? (
+                            <promotionPaymentBtn
+                              total={charge}
+                              companyName={companyName}
+                              dateOfExpiration={isExpired}
+                              companyWebsite={companyWebsite}
+                              address={address}
+                              duration={duration}
+                              country={country}
+                              region={region}
+                              state={state}
+                              dispatch={dispatch}
+                            />
+                          ) : (
+                            <div className="col-12">
+                              <div
+                                className="form-group login-btn"
+                                style={{ justifyContent: 'space-between' }}
+                              >
+                                {terms_conditions ? (
+                                  <button
+                                    type="submit"
+                                    className="btn w-100"
+                                    onClick={handlePromotionRequest}
+                                  >
+                                    <b>Continue For ${charge}</b>
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="submit"
+                                    disabled
+                                    className="btn w-100"
+                                  >
+                                    <b>
+                                      Kindly agree to our Conditions of Use &
+                                      Sale.
+                                    </b>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </form>
+                    {/* End Form */}
                   </div>
-                </form>
-                {/* End Form */}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-      {sites.map((site) => (
-        <Footer key={site._id} site={site} />
-      ))}
+          </section>
+          {sites.map((site) => (
+            <Footer key={site._id} site={site} />
+          ))}
+        </>
+      )}
     </>
   )
 }

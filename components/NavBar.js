@@ -5,10 +5,12 @@ import { DataContext } from '../store/GlobalState'
 import { getData } from '../utils/fetchData'
 import { toast } from 'react-toastify'
 import Cookie from 'js-cookie'
+import { ethers } from 'ethers'
 import Filter from './Filter'
 
 function NavBar({ site }) {
   const [page, setPage] = useState(1)
+  const [defaultAccount, setDefaultAccount] = useState('Connect Wallet')
 
   const router = useRouter()
   const { state, dispatch } = useContext(DataContext)
@@ -65,23 +67,55 @@ function NavBar({ site }) {
     for (let i = 0; i < promotions.length; i++) {
       if (promotions[i].activated == true && promotions[i].paid == true) {
         return router.push('/promotion-user-create-nft')
-      } else if (
-        promotions[i].activated == false &&
-        promotions[i].paid == true
-      ) {
+      }
+
+      if (promotions[i].activated == false && promotions[i].paid == true) {
         toast.error('Promotion verification still under review.')
         return router.push('/')
-      } else if (
-        promotions[i].activated == false &&
-        promotions[i].paid == false
-      ) {
+      }
+
+      if (promotions[i].activated == false && promotions[i].paid == false) {
         toast.error('Please complete your promotion payments.')
-        return router.push('/')
-      } else {
         return router.push('/')
       }
     }
   }
+
+  const connectWalletHandler = async () => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })
+      const account = accounts[0]
+
+      return account
+    }
+    if (!window.ethereum) {
+      toast('Wallet not installed')
+      return
+    }
+  }
+
+  useEffect(() => {
+    if (!window.ethereum) {
+      return
+    }
+    connectWalletHandler().then((result) => {
+      setDefaultAccount(
+        result[0] +
+          result[1] +
+          result[2] +
+          result[3] +
+          result[4] +
+          result[5] +
+          '....' +
+          result[38] +
+          result[39] +
+          result[40] +
+          result[41],
+      )
+    })
+  }, [defaultAccount])
 
   const adminRouter = () => {
     return (
@@ -279,6 +313,16 @@ function NavBar({ site }) {
                                   </Link>
                                 </li>
                               ) : null}
+                              <li>
+                                <button
+                                  style={{ background: '#F7941D' }}
+                                  className="btn mt-2 rounded"
+                                  id="connect"
+                                  onClick={connectWalletHandler}
+                                >
+                                  {defaultAccount}
+                                </button>
+                              </li>
                             </ul>
                           </div>
                         </div>

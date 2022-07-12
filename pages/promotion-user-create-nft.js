@@ -141,11 +141,27 @@ export default function PromotionUserCreateNFT(props) {
 
   promotions.map((promotion) => {
     if (auth.user.role === 'admin') {
-      console.log("RESTRICTION PROMOTION:", promotion.activated);
-        router.push('/')
+      console.log('RESTRICTION PROMOTION:', promotion.activated)
+      router.push('/')
       return null
     }
   })
+
+  useEffect(() => {
+    for (let i = 0; i < promotions.length; i++) {
+      if (promotions[i].activated == true && promotions[i].paid == true) {
+        return router.push('/promotion-user-create-nft')
+      }
+
+      if (promotions[i].activated == false && promotions[i].paid == true) {
+        return router.push('/')
+      }
+
+      if (promotions[i].activated == false && promotions[i].paid == false) {
+        return router.push('/')
+      }
+    }
+  }, [])
 
   return (
     <>
